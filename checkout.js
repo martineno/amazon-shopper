@@ -45,7 +45,7 @@ const puppeteer = require("puppeteer");
 
       // select first slot
       await click("li.ufss-slot-container");
-      await screenshot("slot-found-selected-slot.png");
+      await screenshot("slot-found-1-selected.png");
 
       // click through checkout pages
       await clickAndWait("input.a-button-input");
@@ -84,7 +84,7 @@ function api(page) {
       ]);
     },
     content: async () => page.content(),
-    screenshot: async (path) => page.screenshot({ path }),
+    screenshot: async (path) => {page.screenshot({ path }),
   };
 }
 
