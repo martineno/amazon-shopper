@@ -8,7 +8,7 @@ const puppeteer = require("puppeteer");
     defaultViewport: null,
   });
   const page = await browser.newPage();
-  const { goto, isVisible, has, clicks, content } = api(page);
+  const { goto, has, click, clickAndWait, content } = api(page);
   const start =
     "https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1";
 
@@ -16,44 +16,38 @@ const puppeteer = require("puppeteer");
 
   while (true) {
     await goto(start);
-    if (await isVisible("li.ufss-slot-container")) {
-      // Found slot!
-      console.log("Found a slot!");
-      await emailer.mail(`slot found`, await content());
-      // select the first slot, without navigating to another page
-      await page.click("li.ufss-slot-container");
-      // click the continue button
-      await clicks([
-        "input.a-button-input",
-        "input#continue-top",
-        "input.place-your-order-button",
-      ]);
-
-      break; // TODO: handle this case
-    } else if (await has("No delivery windows available")) {
+    if (await has("No delivery windows available")) {
       console.log(`[${attempts}] No delivery windows available. Trying again.`);
     } else if (await has("Checkout Whole Foods Market Cart")) {
       console.log(`Checkout Whole Foods Market Cart`);
-      await clicks([
-        'input[name^="proceedToALMCheckout"]',
-        'a[name="proceedToCheckout"]',
-        'input[type="submit"]',
-      ]);
+      await clickAndWait('input[name^="proceedToALMCheckout"]');
+      await clickAndWait('a[name="proceedToCheckout"]');
+      await clickAndWait('input[type="submit"]');
     } else if (
       (await has("Recommended for you")) ||
       (await has("An error occurred when we tried to process your request"))
     ) {
       console.log("Recommended for you || An error occurred...");
-      await clicks([
-        "a#nav-cart",
-        'input[name^="proceedToALMCheckout"]',
-        'a[name="proceedToCheckout"]',
-        'input[type="submit"]',
-      ]);
+      await clickAndWait("a#nav-cart");
+      await clickAndWait('input[name^="proceedToALMCheckout"]');
+      await clickAndWait('a[name="proceedToCheckout"]');
+      await clickAndWait('input[type="submit"]');
     } else if (
       await has("We're sorry we are unable to fulfill your entire order")
     ) {
       console.log("We're sorry we are unable to fulfill your entire order");
+      break; // TODO: handle this case
+    } else {
+      // Found slot!
+      console.log("Found a slot!");
+      await emailer.mail(`slot found`, await content());
+      // select the first slot, without navigating to another page
+      await click("li.ufss-slot-container");
+      // click the continue button
+      await clickAndWait("input.a-button-input");
+      await clickAndWait("input#continue-top");
+      await clickAndWait("input.place-your-order-button");
+
       break; // TODO: handle this case
     }
     attempts++;
@@ -69,20 +63,19 @@ function api(page) {
         page.goto(url),
       ]);
     },
-    has: async (content) => (await page.content()).includes(content),
-    clicks: async (selectors) => {
-      console.log(`clicking on ${selectors}`);
-      for (let selector of selectors) {
-        await Promise.all([
-          page.waitForNavigation({ waitUntil: "networkidle0" }),
-          page.click(selector),
-        ]);
-      }
+    has: async (content) => {
+      const innerText = await page.evaluate(() => document.body.innerText);
+      return innerText.includes(content);
     },
-    isVisible: async (selector) =>
-      page
-        .waitForSelector(selector, { visible: true, timeout: 100 })
-        .catch((e) => {}),
+    click: async (selector) => {
+      await page.click(selector);
+    },
+    clickAndWait: async (selector) => {
+      return await Promise.all([
+        page.waitForNavigation({ waitUntil: "networkidle0" }),
+        page.click(selector),
+      ]);
+    },
     content: async () => page.content(),
   };
 }
