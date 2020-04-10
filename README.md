@@ -21,7 +21,7 @@
 
 ### [Optional] Configure Emailer
 
-To send email notifications, create a `config.json` file with the following structure:
+To send email notifications when a delivery slot is found, create a `config.json` file with the following structure:
 
 ```
 {
