@@ -44,8 +44,7 @@ const puppeteer = require("puppeteer");
     } else {
       // Found slot!
       console.log("Found a slot!");
-      await emailer.mail(emailRecipients, `slot found`, await content());
-      await snap(`artifacts/checkout-page1.png`);
+      await emailer.mail(`slot found`, await content());
       // select the first slot, then click the continue button
       await clicks(["li.ufss-slot-container", "input.a-button-input"]);
 
@@ -75,7 +74,6 @@ function api(page) {
       }
     },
     content: async () => page.content(),
-    snap: async (path) => page.screenshot({ path }),
   };
 }
 
@@ -95,12 +93,12 @@ async function getEmailer() {
     ...nodemailerConfig,
   });
   return {
-    mail: async (to, subject, text) => {
+    mail: async (subject, text) => {
       return new Promise((resolve, reject) => {
         transport.sendMail(
           {
             from: nodemailerConfig.auth.user,
-            to,
+            to: emailRecipients,
             subject,
             text,
           },
