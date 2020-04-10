@@ -11,7 +11,15 @@
 
 ### Instructions
 
-1. `git clone git@github.com:albertywu/amazon-shopper.git`
+1. Install
+
+From your working directory:
+
+```
+git clone git@github.com:albertywu/amazon-shopper.git
+cd amazon-shopper
+yarn
+```
 
 2. `yarn setup`
    This command will start up a fresh instance of Google Chrome. All browser information (session data, etc) are stored locally in `./chrome-data-dir` and are sandboxed there. Login to Amazon, and set up your Whole Foods shopping cart with items you'd like to purchase.
