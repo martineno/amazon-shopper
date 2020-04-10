@@ -8,7 +8,7 @@ const puppeteer = require("puppeteer");
     defaultViewport: null,
   });
   const page = await browser.newPage();
-  const { goto, has, click, clickAndWait, content } = api(page);
+  const { goto, has, click, clickAndWait, content, screenshot } = api(page);
   const start =
     "https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1";
 
@@ -40,15 +40,22 @@ const puppeteer = require("puppeteer");
     } else {
       // Found slot!
       console.log("Found a slot!");
+      await screenshot("slot-found-1.png");
       await emailer.mail(`slot found`, await content());
-      // select the first slot, without navigating to another page
-      await click("li.ufss-slot-container");
-      // click the continue button
-      await clickAndWait("input.a-button-input");
-      await clickAndWait("input#continue-top");
-      await clickAndWait("input.place-your-order-button");
 
-      break; // TODO: handle this case
+      // select first slot
+      await click("li.ufss-slot-container");
+      await screenshot("slot-found-selected-slot.png");
+
+      // click through checkout pages
+      await clickAndWait("input.a-button-input");
+      await screenshot("slot-found-2.png");
+      await clickAndWait("input#continue-top");
+      await screenshot("slot-found-3.png");
+      await clickAndWait("input.place-your-order-button");
+      await screenshot("slot-found-4.png");
+
+      break;
     }
     attempts++;
   }
@@ -77,6 +84,7 @@ function api(page) {
       ]);
     },
     content: async () => page.content(),
+    screenshot: async (path) => page.screenshot({ path }),
   };
 }
 

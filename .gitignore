@@ -1,3 +1,4 @@
 node_modules/
 chrome-data-dir/
 config.json
+slot-*
