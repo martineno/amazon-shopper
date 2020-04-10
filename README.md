@@ -8,7 +8,7 @@
 
 1. `git clone git@github.com:albertywu/amazon-shopper.git`
 
-2. `yarn setup.sh`
+2. `yarn setup`
    This command will start up a fresh instance of chrome. Login to Amazon, and set up your Whole Foods shopping cart with items you'd like to purchase.
 
 3. `yarn checkout`
