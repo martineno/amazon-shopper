@@ -36,7 +36,7 @@ const puppeteer = require("puppeteer");
       await has("We're sorry we are unable to fulfill your entire order")
     ) {
       console.log("We're sorry we are unable to fulfill your entire order");
-      break; // TODO: handle this case
+      await clickAndWait('input[name="continue-top"]');
     } else {
       // Found slot!
       console.log("Found a slot!");
