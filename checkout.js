@@ -8,7 +8,7 @@ const puppeteer = require("puppeteer");
     defaultViewport: null,
   });
   const page = await browser.newPage();
-  const { goto, has, clicks, content } = api(page);
+  const { goto, isVisible, has, clicks, content } = api(page);
   const start =
     "https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1";
 
@@ -16,7 +16,15 @@ const puppeteer = require("puppeteer");
 
   while (true) {
     await goto(start);
-    if (await has("No delivery windows available")) {
+    if (await isVisible("li.ufss-slot-container")) {
+      // Found slot!
+      console.log("Found a slot!");
+      await emailer.mail(`slot found`, await content());
+      // select the first slot, then click the continue button
+      await clicks(["li.ufss-slot-container", "input.a-button-input"]);
+
+      break; // TODO: handle this case
+    } else if (await has("No delivery windows available")) {
       console.log(`[${attempts}] No delivery windows available. Trying again.`);
     } else if (await has("Checkout Whole Foods Market Cart")) {
       console.log(`Checkout Whole Foods Market Cart`);
@@ -40,14 +48,6 @@ const puppeteer = require("puppeteer");
       await has("We're sorry we are unable to fulfill your entire order")
     ) {
       console.log("We're sorry we are unable to fulfill your entire order");
-      break; // TODO: handle this case
-    } else {
-      // Found slot!
-      console.log("Found a slot!");
-      await emailer.mail(`slot found`, await content());
-      // select the first slot, then click the continue button
-      await clicks(["li.ufss-slot-container", "input.a-button-input"]);
-
       break; // TODO: handle this case
     }
     attempts++;
@@ -73,6 +73,10 @@ function api(page) {
         ]);
       }
     },
+    isVisible: async (selector) =>
+      page
+        .waitForSelector(selector, { visible: true, timeout: 100 })
+        .catch((e) => {}),
     content: async () => page.content(),
   };
 }
