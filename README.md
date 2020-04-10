@@ -1,10 +1,10 @@
-# Amazon Whole Foods Shopper
+### Amazon Whole Foods Shopper
 
 - Checks for open delivery windows
 - If open delivery window is found, complete purchase
 - Uses Google Chrome, with Puppeteer for automation
 
-# Instructions
+### Instructions
 
 1. `git clone git@github.com:albertywu/amazon-shopper.git`
 
@@ -14,7 +14,7 @@
 3. `yarn checkout`
    This command will start the checkout process, which 1) looks for open delivery windows, and 2) completes purchase if an open window is found. From time to time Amazon will complain about various things like items being out of stock. When this happens, the app will blindly accept default suggestions (by clicking "Continue"), bringing us back to the checkout page.
 
-# [Optional] Configure Emailer
+### [Optional] Configure Emailer
 
 To send email notifications, create a `config.json` file with the following structure:
 
