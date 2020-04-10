@@ -1,8 +1,8 @@
 # Amazon Whole Foods Shopper
 
-• Checks for open delivery windows
-• If open delivery window is found, complete purchase
-• Uses Google Chrome, with Puppeteer for automation
+- Checks for open delivery windows
+- If open delivery window is found, complete purchase
+- Uses Google Chrome, with Puppeteer for automation
 
 # Instructions
 
