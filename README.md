@@ -4,6 +4,11 @@
 - If open delivery window is found, complete purchase
 - Uses Google Chrome, with Puppeteer for automation
 
+### Prerequisites
+
+- Mac OS X (tested with 10.14.6)
+- Google Chrome (tested with 81.0.4044.92)
+
 ### Instructions
 
 1. `git clone git@github.com:albertywu/amazon-shopper.git`

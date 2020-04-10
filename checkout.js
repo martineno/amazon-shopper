@@ -1,72 +1,78 @@
 const puppeteer = require("puppeteer");
-const util = require("util");
-const exec = util.promisify(require("child_process").exec);
-const { spawn } = require("child_process");
-const [_, __, browserWSEndpoint] = process.argv;
 
 (async () => {
   const emailer = await getEmailer();
-  const { browserWSEndpoint } = await launchChrome();
+  const { browserWSEndpoint, kill } = await launchChrome();
   const browser = await puppeteer.connect({
     browserWSEndpoint,
     defaultViewport: null,
   });
   const page = await browser.newPage();
-  const { go, has, click, content } = api(page);
+  const { goto, has, clicks, content } = api(page);
   const start =
     "https://www.amazon.com/gp/buy/shipoptionselect/handlers/display.html?hasWorkingJavascript=1";
 
   let attempts = 0;
 
   while (true) {
-    await go(start);
+    await goto(start);
     if (await has("No delivery windows available")) {
       console.log(`[${attempts}] No delivery windows available. Trying again.`);
     } else if (await has("Checkout Whole Foods Market Cart")) {
       console.log(`Checkout Whole Foods Market Cart`);
-      await click('input[name^="proceedToALMCheckout"]');
-      await click('a[name="proceedToCheckout"]');
-      await click('input[type="submit"]');
+      await clicks([
+        'input[name^="proceedToALMCheckout"]',
+        'a[name="proceedToCheckout"]',
+        'input[type="submit"]',
+      ]);
+    } else if (
+      (await has("Recommended for you")) ||
+      (await has("An error occurred when we tried to process your request"))
+    ) {
+      console.log("Recommended for you || An error occurred...");
+      await clicks([
+        "a#nav-cart",
+        'input[name^="proceedToALMCheckout"]',
+        'a[name="proceedToCheckout"]',
+        'input[type="submit"]',
+      ]);
     } else if (
       await has("We're sorry we are unable to fulfill your entire order")
     ) {
       console.log("We're sorry we are unable to fulfill your entire order");
       break; // TODO: handle this case
-    } else if (await has("Recommended for you")) {
-      console.log("Recommended for you");
-      await click("a#nav-cart");
-      await click('input[name^="proceedToALMCheckout"]');
-      await click('a[name="proceedToCheckout"]');
-      await click('input[type="submit"]');
-    } else if (
-      await has("An error occurred when we tried to process your request")
-    ) {
-      console.log("An error occured when we tried to process your request");
-      await click("a#nav-cart");
-      await click('input[name^="proceedToALMCheckout"]');
-      await click('a[name="proceedToCheckout"]');
-      await click('input[type="submit"]');
     } else {
       // Found slot!
       console.log("Found a slot!");
-      await mail(emailRecipients, `just a test`, await content());
+      await emailer.mail(emailRecipients, `slot found`, await content());
       await snap(`artifacts/checkout-page1.png`);
+      // select the first slot, then click the continue button
+      await clicks(["li.ufss-slot-container", "input.a-button-input"]);
+
       break; // TODO: handle this case
     }
     attempts++;
   }
+  // kill();
 })();
 
 function api(page) {
   return {
-    go: async (url) => page.goto(url, { waitUntil: "networkidle0" }),
-    has: async (content) => (await page.content()).includes(content),
-    click: async (selector) => {
-      console.log(`clicked ${selector}`);
+    goto: async (url) => {
       return Promise.all([
         page.waitForNavigation({ waitUntil: "networkidle0" }),
-        page.click(selector),
+        page.goto(url),
       ]);
+    },
+    has: async (content) => (await page.content()).includes(content),
+    clicks: async (selectors) => {
+      console.log(`clicking on ${selectors}`);
+      for (let selector of selectors) {
+        await Promise.all([
+          page.waitForNavigation({ waitUntil: "networkidle0" }),
+          page.click(selector),
+        ]);
+      }
     },
     content: async () => page.content(),
     snap: async (path) => page.screenshot({ path }),
@@ -117,6 +123,7 @@ async function delay(ms) {
 
 async function launchChrome() {
   return new Promise((resolve, reject) => {
+    const { spawn } = require("child_process");
     const cp = spawn(
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // prettier-ignore
       [
@@ -131,7 +138,10 @@ async function launchChrome() {
       stderr += data;
       if (stderr.includes("XXX Init()")) {
         const [_, browserWSEndpoint] = stderr.match(/listening on ([^\s]+)/);
-        resolve({ browserWSEndpoint });
+        resolve({
+          browserWSEndpoint,
+          kill: () => cp.kill(),
+        });
       }
     });
   });
