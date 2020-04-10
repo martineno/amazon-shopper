@@ -20,8 +20,14 @@ const puppeteer = require("puppeteer");
       // Found slot!
       console.log("Found a slot!");
       await emailer.mail(`slot found`, await content());
-      // select the first slot, then click the continue button
-      await clicks(["li.ufss-slot-container", "input.a-button-input"]);
+      // select the first slot, without navigating to another page
+      await page.click("li.ufss-slot-container");
+      // click the continue button
+      await clicks([
+        "input.a-button-input",
+        "input#continue-top",
+        "input.place-your-order-button",
+      ]);
 
       break; // TODO: handle this case
     } else if (await has("No delivery windows available")) {
