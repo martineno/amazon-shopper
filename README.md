@@ -20,7 +20,7 @@ To send email notifications, create a `config.json` file with the following stru
 
 ```
 {
-  "nodemailerConfig": {
+  "smtpConfig": {
     "host": <string; SMTP host>,
     "port": <number; SMTP port>,
     "auth": {

@@ -81,7 +81,7 @@ async function getEmailer() {
     );
     return { mail: async () => {} };
   }
-  const { nodemailerConfig, emailRecipients } = JSON.parse(
+  const { smtpConfig: nodemailerConfig, emailRecipients } = JSON.parse(
     fs.readFileSync("config.json", "utf8")
   );
   const nodemailer = require("nodemailer");
