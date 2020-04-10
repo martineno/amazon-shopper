@@ -9,6 +9,6 @@
   },
   "scripts": {
     "setup": "./setup.sh",
-    "checkout": "yarn checkout.js"
+    "checkout": "node checkout.js"
   }
 }
