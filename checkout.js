@@ -84,7 +84,7 @@ function api(page) {
       ]);
     },
     content: async () => page.content(),
-    screenshot: async (path) => {page.screenshot({ path }),
+    screenshot: async (path) => page.screenshot({ path }),
   };
 }
 
