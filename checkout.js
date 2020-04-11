@@ -75,13 +75,13 @@ function api(page) {
       return innerText.includes(content);
     },
     click: async (selector) => {
-      await page.click(selector);
+      await page.click(selector).catch((e) => {});
     },
     clickAndWait: async (selector) => {
       return await Promise.all([
         page.waitForNavigation({ waitUntil: "networkidle0" }),
         page.click(selector),
-      ]);
+      ]).catch((e) => {});
     },
     content: async () => page.content(),
     screenshot: async (path) => page.screenshot({ path }),
