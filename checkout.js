@@ -50,8 +50,15 @@ const puppeteer = require("puppeteer");
       // click through checkout pages
       await clickAndWait("input.a-button-input");
       await screenshot("slot-found-2.png");
-      await clickAndWait("input#continue-top");
-      await screenshot("slot-found-3.png");
+
+      // sometimes this page doesn't exist; try clicking anyway...
+      try {
+        await clickAndWait("input#continue-top");
+        await screenshot("slot-found-3.png");
+      } catch (e) {
+        console.log(`click input#continue-top failed; continuing...`);
+      }
+
       await clickAndWait("input.place-your-order-button");
       await screenshot("slot-found-4.png");
 
@@ -74,14 +81,12 @@ function api(page) {
       const innerText = await page.evaluate(() => document.body.innerText);
       return innerText.includes(content);
     },
-    click: async (selector) => {
-      await page.click(selector).catch((e) => {});
-    },
+    click: async (selector) => page.click(selector),
     clickAndWait: async (selector) => {
       return await Promise.all([
         page.waitForNavigation({ waitUntil: "networkidle0" }),
         page.click(selector),
-      ]).catch((e) => {});
+      ]);
     },
     content: async () => page.content(),
     screenshot: async (path) => page.screenshot({ path }),
