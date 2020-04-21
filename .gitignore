@@ -2,3 +2,4 @@ node_modules/
 chrome-data-dir/
 config.json
 slot-found-*
+config-pushover.json
